@@ -1,0 +1,275 @@
+{
+  "name": "Deploy Tenant Website",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "deploy-tenant-website",
+        "authentication": "headerAuth",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-trigger",
+      "name": "Webhook Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300],
+      "webhookId": "deploy-tenant-website"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "condition-tenant-id",
+              "leftValue": "={{ $json.tenant_id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "isNotEmpty"
+              }
+            },
+            {
+              "id": "condition-domain",
+              "leftValue": "={{ $json.domain }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "isNotEmpty"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "validate-input",
+      "name": "Validar Input",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "content": "## Datos esperados del webhook:\n\n```json\n{\n  \"tenant_id\": \"cliente1\",\n  \"domain\": \"cliente1.miancho.com\",\n  \"negocio\": {\n    \"nombre\": \"Dr. Cliente\",\n    \"especialidad\": \"...\",\n    \"telefono\": \"...\",\n    \"whatsapp\": \"...\",\n    \"email\": \"...\",\n    \"direccion\": \"...\"\n  },\n  \"branding\": {\n    \"colorPrimario\": \"#1e3a5f\",\n    \"colorSecundario\": \"#d4a574\"\n  },\n  \"secciones\": { ... }\n}\n```",
+        "height": 380,
+        "width": 320
+      },
+      "id": "sticky-note",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [40, 160]
+    },
+    {
+      "parameters": {
+        "operation": "executeCommand",
+        "command": "=#!/bin/bash\nset -e\n\nTENANT_ID=\"{{ $json.tenant_id }}\"\nDOMAIN=\"{{ $json.domain }}\"\nTEMPLATE_REPO=\"https://github.com/miancho/tenant-template-medico.git\"\nBASE_PATH=\"/opt/miancho/tenants\"\nCADDY_SITES=\"/opt/miancho/caddy/sites\"\n\necho \"[1/6] Creando directorio para $DOMAIN...\"\nmkdir -p $BASE_PATH/$DOMAIN\ncd $BASE_PATH/$DOMAIN\n\necho \"[2/6] Clonando template...\"\nif [ -d \".git\" ]; then\n  git pull origin main\nelse\n  git clone $TEMPLATE_REPO .\nfi\n\necho \"[3/6] Escribiendo tenant.config.json...\"\ncat > tenant.config.json << 'CONFIGEOF'\n{{ JSON.stringify($json.config, null, 2) }}\nCONFIGEOF\n\necho \"[4/6] Instalando dependencias y build...\"\npnpm install --frozen-lockfile\npnpm build\n\necho \"[5/6] Configurando Caddy...\"\ncat > $CADDY_SITES/$TENANT_ID.caddy << EOF\n$DOMAIN {\n    root * $BASE_PATH/$DOMAIN/out\n    file_server\n    encode gzip\n    try_files {path} {path}.html {path}/ /404.html\n    \n    header {\n        X-Tenant-ID \"$TENANT_ID\"\n        X-Frame-Options \"SAMEORIGIN\"\n        X-Content-Type-Options \"nosniff\"\n    }\n}\nEOF\n\necho \"[6/6] Recargando Caddy...\"\ndocker exec caddy caddy reload --config /etc/caddy/Caddyfile\n\necho \"Deploy completado: https://$DOMAIN\""
+      },
+      "id": "ssh-deploy",
+      "name": "SSH Deploy",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [680, 280],
+      "credentials": {
+        "sshPassword": {
+          "id": "VPS_SSH_CREDENTIAL_ID",
+          "name": "VPS SSH"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.cloudflare.com/client/v4/zones/{{ $env.CLOUDFLARE_ZONE_ID }}/dns_records",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"type\": \"A\",\n  \"name\": \"{{ $('Webhook Trigger').item.json.domain.split('.')[0] }}\",\n  \"content\": \"{{ $env.VPS_IP }}\",\n  \"ttl\": 1,\n  \"proxied\": true\n}",
+        "options": {}
+      },
+      "id": "cloudflare-dns",
+      "name": "Crear DNS Cloudflare",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [680, 480],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "CLOUDFLARE_CREDENTIAL_ID",
+          "name": "Cloudflare API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "mergeByFields": {
+          "values": []
+        },
+        "combinationMode": "mergeByPosition",
+        "options": {}
+      },
+      "id": "merge-results",
+      "name": "Merge Results",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [900, 360]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"success\": true,\n  \"tenant_id\": \"{{ $('Webhook Trigger').item.json.tenant_id }}\",\n  \"domain\": \"{{ $('Webhook Trigger').item.json.domain }}\",\n  \"url\": \"https://{{ $('Webhook Trigger').item.json.domain }}\",\n  \"deployed_at\": \"{{ $now.toISO() }}\",\n  \"message\": \"Website deployed successfully\"\n}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "id": "respond-success",
+      "name": "Respond Success",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [1120, 360]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"success\": false,\n  \"error\": \"Missing required fields: tenant_id and domain are required\",\n  \"received\": {{ JSON.stringify($('Webhook Trigger').item.json) }}\n}",
+        "options": {
+          "responseCode": 400
+        }
+      },
+      "id": "respond-error",
+      "name": "Respond Error",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [680, 520]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "prep-config",
+              "name": "config",
+              "value": "={{ {\n  tenant_id: $json.tenant_id,\n  negocio: $json.negocio || {},\n  branding: $json.branding || {\n    colorPrimario: '#1e3a5f',\n    colorSecundario: '#d4a574',\n    colorAccento: '#2563eb'\n  },\n  secciones: $json.secciones || {},\n  seo: $json.seo || {},\n  footer: $json.footer || {}\n} }}",
+              "type": "object"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "prepare-config",
+      "name": "Preparar Config",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [460, 140]
+    }
+  ],
+  "connections": {
+    "Webhook Trigger": {
+      "main": [
+        [
+          {
+            "node": "Validar Input",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Preparar Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar Input": {
+      "main": [
+        [
+          {
+            "node": "SSH Deploy",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Crear DNS Cloudflare",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SSH Deploy": {
+      "main": [
+        [
+          {
+            "node": "Merge Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Crear DNS Cloudflare": {
+      "main": [
+        [
+          {
+            "node": "Merge Results",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge Results": {
+      "main": [
+        [
+          {
+            "node": "Respond Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar Config": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "name": "deploy",
+      "id": "1"
+    },
+    {
+      "name": "tenant",
+      "id": "2"
+    }
+  ]
+}
