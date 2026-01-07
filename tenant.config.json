@@ -1,0 +1,186 @@
+{
+  "tenant_id": "demo-consultorio",
+  "negocio": {
+    "nombre": "Dr. Juan Pérez",
+    "especialidad": "Cirugía Plástica y Medicina Estética",
+    "logo": "/images/logo.png",
+    "telefono": "+5491112345678",
+    "whatsapp": "+5491112345678",
+    "email": "contacto@drjuanperez.com",
+    "direccion": "Av. Santa Fe 1234, Piso 5, CABA",
+    "ciudad": "Buenos Aires",
+    "horarios": {
+      "semana": "Lunes a Viernes 9:00 - 18:00",
+      "sabado": "Sábados 9:00 - 13:00",
+      "domingo": "Cerrado"
+    }
+  },
+  "branding": {
+    "colorPrimario": "#1e3a5f",
+    "colorSecundario": "#d4a574",
+    "colorAccento": "#2563eb",
+    "colorFondo": "#ffffff",
+    "colorTexto": "#1f2937",
+    "fuenteTitulos": "Playfair Display",
+    "fuenteTexto": "Inter"
+  },
+  "secciones": {
+    "hero": {
+      "activo": true,
+      "orden": 1,
+      "titulo": "Cirugía Plástica de Excelencia",
+      "subtitulo": "Más de 20 años de experiencia transformando vidas con resultados naturales y armónicos",
+      "imagen": "/images/hero.jpg",
+      "cta": {
+        "texto": "Agendar Consulta",
+        "tipo": "whatsapp",
+        "mensaje": "Hola, me gustaría agendar una consulta"
+      }
+    },
+    "servicios": {
+      "activo": true,
+      "orden": 2,
+      "titulo": "Tratamientos",
+      "subtitulo": "Procedimientos especializados con los más altos estándares de calidad",
+      "items": [
+        {
+          "id": "rinoplastia",
+          "nombre": "Rinoplastia",
+          "descripcion": "Cirugía de nariz para mejorar la armonía facial",
+          "icono": "nose",
+          "imagen": "/images/servicios/rinoplastia.jpg",
+          "slug": "rinoplastia"
+        },
+        {
+          "id": "blefaroplastia",
+          "nombre": "Blefaroplastia",
+          "descripcion": "Rejuvenecimiento de párpados para una mirada más fresca",
+          "icono": "eye",
+          "imagen": "/images/servicios/blefaroplastia.jpg",
+          "slug": "blefaroplastia"
+        },
+        {
+          "id": "liposuccion",
+          "nombre": "Liposucción",
+          "descripcion": "Eliminación de grasa localizada para moldear tu figura",
+          "icono": "body",
+          "imagen": "/images/servicios/liposuccion.jpg",
+          "slug": "liposuccion"
+        },
+        {
+          "id": "botox",
+          "nombre": "Botox",
+          "descripcion": "Tratamiento para suavizar líneas de expresión",
+          "icono": "syringe",
+          "imagen": "/images/servicios/botox.jpg",
+          "slug": "botox"
+        }
+      ]
+    },
+    "sobreMi": {
+      "activo": true,
+      "orden": 3,
+      "titulo": "Sobre el Dr. Pérez",
+      "contenido": "Con más de 20 años de experiencia en cirugía plástica y reconstructiva, me especializo en procedimientos que realzan la belleza natural de cada paciente. Mi filosofía se basa en escuchar las necesidades individuales y crear resultados armónicos y duraderos.",
+      "imagen": "/images/doctor.jpg",
+      "credenciales": [
+        "Médico Cirujano - Universidad de Buenos Aires",
+        "Especialista en Cirugía Plástica - MN 12345",
+        "Miembro de la Sociedad Argentina de Cirugía Plástica (SACPER)",
+        "Fellow del American College of Surgeons"
+      ]
+    },
+    "testimonios": {
+      "activo": true,
+      "orden": 4,
+      "titulo": "Testimonios",
+      "subtitulo": "Lo que dicen nuestros pacientes",
+      "items": [
+        {
+          "nombre": "María G.",
+          "texto": "Excelente profesional. Me sentí cuidada en todo momento y los resultados superaron mis expectativas.",
+          "tratamiento": "Rinoplastia",
+          "rating": 5
+        },
+        {
+          "nombre": "Carolina P.",
+          "texto": "El Dr. Pérez me explicó todo el proceso con mucha claridad. Muy recomendable.",
+          "tratamiento": "Blefaroplastia",
+          "rating": 5
+        },
+        {
+          "nombre": "Laura M.",
+          "texto": "Después de años pensándolo, me animé y no me arrepiento. Resultados muy naturales.",
+          "tratamiento": "Liposucción",
+          "rating": 5
+        }
+      ]
+    },
+    "faq": {
+      "activo": true,
+      "orden": 5,
+      "titulo": "Preguntas Frecuentes",
+      "items": [
+        {
+          "pregunta": "¿Cuánto dura la recuperación de una rinoplastia?",
+          "respuesta": "La recuperación inicial toma entre 7 y 10 días. Los resultados finales se aprecian completamente entre 6 meses y un año."
+        },
+        {
+          "pregunta": "¿Las cirugías son ambulatorias?",
+          "respuesta": "Depende del procedimiento. Muchos tratamientos son ambulatorios, pero algunas cirugías requieren una noche de internación."
+        },
+        {
+          "pregunta": "¿Qué formas de pago aceptan?",
+          "respuesta": "Aceptamos efectivo, transferencia bancaria, y tarjetas de crédito con opción de financiación."
+        },
+        {
+          "pregunta": "¿Trabajan con obras sociales?",
+          "respuesta": "Trabajamos con las principales obras sociales y prepagas. Consultá por tu cobertura."
+        }
+      ]
+    },
+    "contacto": {
+      "activo": true,
+      "orden": 6,
+      "titulo": "Contacto",
+      "subtitulo": "Agendá tu consulta",
+      "mostrarMapa": true,
+      "mostrarFormulario": true,
+      "mostrarHorarios": true,
+      "webhookFormulario": "https://n8n.example.com/webhook/contacto"
+    }
+  },
+  "seo": {
+    "titulo": "Dr. Juan Pérez | Cirugía Plástica en Buenos Aires",
+    "descripcion": "Especialista en cirugía plástica y medicina estética en CABA. Rinoplastia, blefaroplastia, liposucción y más. Más de 20 años de experiencia.",
+    "keywords": [
+      "cirugía plástica",
+      "rinoplastia buenos aires",
+      "blefaroplastia",
+      "liposucción",
+      "cirujano plástico caba"
+    ],
+    "ogImage": "/images/og-image.jpg"
+  },
+  "integraciones": {
+    "googleAnalytics": "",
+    "googleMaps": {
+      "apiKey": "",
+      "lat": -34.5957,
+      "lng": -58.3986,
+      "zoom": 15
+    }
+  },
+  "footer": {
+    "copyright": "© 2024 Dr. Juan Pérez. Todos los derechos reservados.",
+    "redes": {
+      "instagram": "https://instagram.com/drjuanperez",
+      "facebook": "https://facebook.com/drjuanperez",
+      "linkedin": ""
+    },
+    "legal": {
+      "privacidad": "/privacidad",
+      "terminos": "/terminos"
+    }
+  }
+}
